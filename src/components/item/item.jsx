@@ -14,6 +14,8 @@ const Item = () => {
 
     useEffect(() => {
         fetchItems();
+        console.log(document.cookie);
+
     }, []);
 
     const fetchItems = async () => {
@@ -102,99 +104,101 @@ const Item = () => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
-            <h2 className="text-2xl font-semibold mb-4 text-center">
-                {editingId ? "Edit Item" : "Add Item"}
-            </h2>
-            <form
-                onSubmit={handleSubmit}
-                className="space-y-4 bg-gray-50 p-6 rounded-lg shadow-md"
-            >
-                <input
-                    type="text"
-                    placeholder="Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="bg-slate-100 p-10">
+            <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg">
+                <h2 className="text-2xl font-semibold p-4 text-center">
+                    {editingId ? "Edit Produk" : "Tambah Produk"}
+                </h2>
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-4 bg-white p-6 rounded-lg shadow-md"
                 >
-                    <option value="FOOD">Food</option>
-                    <option value="DRINK">Drink</option>
-                </select>
-                <input
-                    type="number"
-                    placeholder="Price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                    type="number"
-                    placeholder="Cost"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                    required
-                    className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="flex gap-3">
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200"
+                    <input
+                        type="text"
+                        placeholder="Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        {editingId ? "Update" : "Create"}
-                    </button>
-                    {editingId && (
+                        <option value="FOOD">Food</option>
+                        <option value="DRINK">Drink</option>
+                    </select>
+                    <input
+                        type="number"
+                        placeholder="Price"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        required
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <input
+                        type="number"
+                        placeholder="Cost"
+                        value={cost}
+                        onChange={(e) => setCost(e.target.value)}
+                        required
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="flex gap-3">
                         <button
-                            type="button"
-                            onClick={resetForm}
-                            className="w-full bg-gray-400 text-white py-2 rounded hover:bg-gray-500 transition duration-200"
+                            type="submit"
+                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200"
                         >
-                            Cancel
+                            {editingId ? "Update" : "Create"}
                         </button>
-                    )}
-                </div>
-            </form>
+                        {editingId && (
+                            <button
+                                type="button"
+                                onClick={resetForm}
+                                className="w-full bg-gray-400 text-white py-2 rounded hover:bg-gray-500 transition duration-200"
+                            >
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
 
-            <h2 className="text-2xl font-semibold mt-6 text-center">Item List</h2>
-            <table className="w-full border-collapse border border-gray-300 text-center mt-4">
-                <thead>
-                    <tr className="bg-gray-200">
-                        <th className="border p-2">Nama Item</th>
-                        <th className="border p-2">Tipe</th>
-                        <th className="border p-2">Harga</th>
-                        <th className="border p-2">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {items.map((item) => (
-                        <tr key={item.external_id} className="hover:bg-gray-100">
-                            <td className="border p-2">{item.name}</td>
-                            <td className="border p-2">{item.type}</td>
-                            <td className="border p-2">{formatRupiah(item.price)}</td>
-                            <td className="border p-2 flex justify-center gap-2">
-                                <button
-                                    onClick={() => handleEdit(item)}
-                                    className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.external_id)}
-                                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                >
-                                    Hapus
-                                </button>
-                            </td>
+                <h2 className="text-2xl font-semibold mt-6 text-center">List Produk</h2>
+                <table className="w-full border-collapse border border-gray-300 text-center mt-4">
+                    <thead>
+                        <tr className="bg-gray-200">
+                            <th className="border p-2">Nama Produk</th>
+                            <th className="border p-2">Tipe</th>
+                            <th className="border p-2">Harga</th>
+                            <th className="border p-2">Aksi</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {items.map((item) => (
+                            <tr key={item.external_id} className="hover:bg-gray-100">
+                                <td className="border p-2">{item.name}</td>
+                                <td className="border p-2">{item.type}</td>
+                                <td className="border p-2">{formatRupiah(item.price)}</td>
+                                <td className="border p-2 flex justify-center gap-2">
+                                    <button
+                                        onClick={() => handleEdit(item)}
+                                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(item.external_id)}
+                                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                                    >
+                                        Hapus
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

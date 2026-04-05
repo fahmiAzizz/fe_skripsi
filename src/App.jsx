@@ -1,90 +1,149 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import "chart.js/auto";
 
 export default function App() {
-  const [salesData, setSalesData] = useState([]);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [monthlySummary, setMonthlySummary] = useState(null);
+
+  const query = new URLSearchParams(window.location.search);
+  const monthQuery = query.get("month");
+  const yearQuery = query.get("year");
+
+  const now = new Date();
+  const effectiveMonth = monthQuery ?? String(now.getMonth() + 1);
+  const effectiveYear = yearQuery ?? String(now.getFullYear());
 
   useEffect(() => {
-    axios.get("http://localhost:4321/v1/dailySaleItem", {
-      withCredentials: true
-    })
-      .then(response => setSalesData(response.data))
-      .catch(error => console.error("Error fetching sales data:", error));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const [itemRes, summaryRes] = await Promise.all([
+          axios.get(`http://localhost:4321/v1/monthlySaleItem/date?month=${effectiveMonth}&year=${effectiveYear}`, {
+            withCredentials: true,
+          }),
+          axios.get(`http://localhost:4321/v1/monthlySaleSummary/date?month=${effectiveMonth}&year=${effectiveYear}`, {
+            withCredentials: true,
+          }),
+        ]);
 
-  // Filter hanya data bulan ini
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
+        setMonthlySales(itemRes.data);
+        setMonthlySummary(summaryRes.data);
+      } catch (err) {
+        console.error("Gagal mengambil data:", err);
+      }
+    };
 
-  const currentMonthData = salesData.filter(sale => {
-    if (!sale.date) return false;
-    const saleDate = new Date(sale.date);
-    return (
-      saleDate.getMonth() === currentMonth &&
-      saleDate.getFullYear() === currentYear
-    );
-  });
+    fetchData();
+  }, [effectiveMonth, effectiveYear]);
 
-  // Group data berdasarkan item
-  const groupedData = currentMonthData.reduce((acc, sale) => {
-    if (!acc[sale.item_name]) {
-      acc[sale.item_name] = { amount: 0, income: 0 };
-    }
-    acc[sale.item_name].amount += sale.amount;
-    acc[sale.item_name].income += sale.income;
-    return acc;
-  }, {});
-
-  const items = Object.keys(groupedData);
-  const amounts = items.map(item => groupedData[item].amount);
-  const incomes = items.map(item => groupedData[item].income);
-
-  const filteredData = currentMonthData.filter(sale => sale.date !== null);
-
-  const incomeByDateMap = filteredData.reduce((acc, sale) => {
-    const dateStr = new Date(sale.date).toISOString().split("T")[0]; // yyyy-mm-dd
-    if (!acc[dateStr]) {
-      acc[dateStr] = 0;
-    }
-    acc[dateStr] += sale.income;
-    return acc;
-  }, {});
-
-  const sortedDates = Object.keys(incomeByDateMap).sort((a, b) => new Date(a) - new Date(b));
-  const incomePerDate = sortedDates.map(date => incomeByDateMap[date]);
+  const chartData = {
+    labels: monthlySales.map(item => item.item_name),
+    datasets: [
+      {
+        label: "Jumlah Terjual",
+        data: monthlySales.map(item => item.total_amount),
+        backgroundColor: "#4CAF50",
+      },
+    ],
+  };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">📊 Dashboard Penjualan</h2>
+    <div className="min-h-screen bg-slate-100 p-6">
 
-      {/* Bar Chart */}
-      <div className="bg-white p-4 rounded-lg shadow-md mb-4">
-        <h3 className="text-lg font-semibold mb-2">Jumlah Penjualan per Item (Bulan Ini)</h3>
-        <Bar data={{
-          labels: items,
-          datasets: [{
-            label: "Jumlah Terjual",
-            data: amounts,
-            backgroundColor: "#4CAF50",
-          }]
-        }} />
+      {/* HEADER */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Dashboard Penjualan
+        </h1>
+        <p className="text-gray-500">
+          Bulan {effectiveMonth} / {effectiveYear}
+        </p>
       </div>
 
-      {/* Line Chart */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-2">Pendapatan Harian (Bulan Ini)</h3>
-        <Line data={{
-          labels: sortedDates.map(d => new Date(d).toLocaleDateString("id-ID")),
-          datasets: [{
-            label: "Pendapatan",
-            data: incomePerDate,
-            borderColor: "#FF9800",
-            fill: false,
-          }]
-        }} />
+      {/* SUMMARY CARDS */}
+      {monthlySummary && (
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Total Item</p>
+            <h2 className="text-xl font-bold">{monthlySummary.total_amount}</h2>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Revenue</p>
+            <h2 className="text-xl font-bold text-green-600">
+              Rp{monthlySummary.total_revenue.toLocaleString("id-ID")}
+            </h2>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Cost</p>
+            <h2 className="text-xl font-bold text-red-500">
+              Rp{monthlySummary.total_cost.toLocaleString("id-ID")}
+            </h2>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow">
+            <p className="text-gray-500 text-sm">Margin</p>
+            <h2 className="text-xl font-bold text-blue-600">
+              Rp{monthlySummary.total_margin.toLocaleString("id-ID")}
+            </h2>
+          </div>
+
+        </div>
+      )}
+
+      {/* CHART */}
+      <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow mb-6">
+        <h3 className="text-lg font-semibold mb-4">
+          Grafik Penjualan per Item
+        </h3>
+
+        {monthlySales.length > 0 ? (
+          <Bar data={chartData} />
+        ) : (
+          <p className="text-gray-500">Tidak ada data penjualan.</p>
+        )}
+      </div>
+
+      {/* TABLE */}
+      <div className="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
+        <h3 className="text-lg font-semibold mb-4">
+          Detail Penjualan
+        </h3>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-2 border">Item</th>
+                <th className="p-2 border">Amount</th>
+                <th className="p-2 border">Revenue</th>
+                <th className="p-2 border">Cost</th>
+                <th className="p-2 border">Margin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlySales.map((item, i) => (
+                <tr key={i} className="text-center hover:bg-gray-50">
+                  <td className="p-2 border">{item.item_name}</td>
+                  <td className="p-2 border">{item.total_amount}</td>
+                  <td className="p-2 border">
+                    Rp{item.total_revenue.toLocaleString("id-ID")}
+                  </td>
+                  <td className="p-2 border">
+                    Rp{item.total_cost.toLocaleString("id-ID")}
+                  </td>
+                  <td className="p-2 border">
+                    Rp{item.total_margin.toLocaleString("id-ID")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
       </div>
     </div>
   );

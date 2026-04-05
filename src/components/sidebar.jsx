@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import { MdDashboard } from "react-icons/md";
 import { BsFillPersonLinesFill } from "react-icons/bs";
 import { IoFastFoodSharp } from "react-icons/io5";
-import { MdOutlinePointOfSale, MdAdminPanelSettings } from "react-icons/md";
+import { MdOutlinePointOfSale } from "react-icons/md";
 import { VscGraphLine } from "react-icons/vsc";
+import { LuWeight } from "react-icons/lu";
 import axios from "axios";
 import Swal from "sweetalert2";
 
 export default function Sidebar({ setActivePage, onLogout, user }) {
     const [expanded, setExpanded] = useState(true);
-
+    const isManager = user?.responseData?.user?.role?.role_name === "Manager";
     useEffect(() => {
         console.log(user);
 
@@ -57,10 +58,11 @@ export default function Sidebar({ setActivePage, onLogout, user }) {
             <nav className="h-full inline-flex flex-col bg-white border-r shadow-sm">
                 <div className="p-4 pb-2 flex justify-between items-center">
                     <img
-                        src="../logo.png"
-                        className={`overflow-hidden transition-all ${expanded ? "w-12" : "w-0"}`}
+                        src="../logo.jpg"
+                        className=' w-14'
                         alt="Logo"
                     />
+                    <p className={`${expanded ? "flex text-2xl font-semibold" : "hidden"}`}>Kopi Malabar 22</p>
                     <button
                         onClick={() => setExpanded((curr) => !curr)}
                         className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
@@ -74,30 +76,33 @@ export default function Sidebar({ setActivePage, onLogout, user }) {
                         <MdDashboard size={25} />
                         <p className={`${expanded ? "flex" : "hidden"}`}>Dashboard</p>
                     </li>
-                    <li onClick={() => setActivePage("employee")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
-                        <BsFillPersonLinesFill size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>Employee</p>
-                    </li>
-                    <li onClick={() => setActivePage("item")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
-                        <IoFastFoodSharp size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>Item</p>
-                    </li>
                     <li onClick={() => setActivePage("sale")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
                         <MdOutlinePointOfSale size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>Sale</p>
+                        <p className={`${expanded ? "flex" : "hidden"}`}>Penjualan</p>
                     </li>
-                    <li onClick={() => setActivePage("spk-monthly")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
-                        <VscGraphLine size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>SPK Monthly</p>
-                    </li>
-                    <li onClick={() => setActivePage("spk-annual")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
-                        <VscGraphLine size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>SPK Annual</p>
-                    </li>
-                    <li onClick={() => setActivePage("role")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
-                        <MdAdminPanelSettings size={25} />
-                        <p className={`${expanded ? "flex" : "hidden"}`}>Role</p>
-                    </li>
+                    {isManager && (
+                        <>
+                            <li onClick={() => setActivePage("employee")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                                <BsFillPersonLinesFill size={25} />
+                                <p className={`${expanded ? "flex" : "hidden"}`}>Karyawan</p>
+                            </li>
+                            <li onClick={() => setActivePage("item")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                                <IoFastFoodSharp size={25} />
+                                <p className={`${expanded ? "flex" : "hidden"}`}>Produk</p>
+                            </li>
+                            <li onClick={() => setActivePage("evaluation")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                                <LuWeight size={25} />
+                                <p className={`${expanded ? "flex" : "hidden"}`}>Penilaian</p>
+                            </li>
+                            <li onClick={() => setActivePage("spk-monthly")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                                <VscGraphLine size={25} />
+                                <p className={`${expanded ? "flex" : "hidden"}`}>SPK Bulanan</p>
+                            </li>
+                            <li onClick={() => setActivePage("spk-annual")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                                <VscGraphLine size={25} />
+                                <p className={`${expanded ? "flex" : "hidden"}`}>SPK Tahunan</p>
+                            </li>
+                        </>)}
                 </ul>
 
                 <div className="border-t flex flex-col p-3">
@@ -122,7 +127,6 @@ export default function Sidebar({ setActivePage, onLogout, user }) {
                                 </>
                             )}
                         </div>
-                        <MoreVertical size={20} />
                     </div>
 
                     <button

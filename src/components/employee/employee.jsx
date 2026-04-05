@@ -3,7 +3,6 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import EmployeeFormAdd from "./employeeFormAdd.jsx";
 import EmployeeFormEdit from "./employeeFormEdit.jsx";
-
 export default function EmployeeList() {
     const [employees, setEmployees] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
@@ -26,7 +25,7 @@ export default function EmployeeList() {
         } catch (error) {
             console.error("Gagal mengambil data:", error);
             Swal.fire("Gagal", "Gagal mengambil data karyawan.", "error");
-            setEmployees([]); // fallback untuk mencegah undefined
+            setEmployees([]);
         }
     };
 
@@ -58,7 +57,7 @@ export default function EmployeeList() {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="p-20 bg-slate-100 min-h-screen">
             {isAdding ? (
                 <EmployeeFormAdd
                     onCancel={() => setIsAdding(false)}
@@ -71,60 +70,81 @@ export default function EmployeeList() {
                     editData={editingEmployee}
                 />
             ) : (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Daftar Karyawan</h2>
-                    <button
-                        onClick={() => setIsAdding(true)}
-                        className="mb-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    >
-                        + Tambah Karyawan
-                    </button>
-                    <table className="w-full border">
-                        <thead>
-                            <tr>
-                                <th className="border px-4 py-2">Nama</th>
-                                <th className="border px-4 py-2">NIK</th>
-                                <th className="border px-4 py-2">Role</th>
-                                <th className="border px-4 py-2">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {employees.length > 0 ? (
-                                employees.map((emp) => (
-                                    <tr key={emp.id}>
-                                        <td className="border px-4 py-2">{emp.first_name}</td>
-                                        <td className="border px-4 py-2">{emp.nik}</td>
-                                        <td className="border px-4 py-2">
-                                            {emp.role_name || "Tidak ada peran"}
-                                        </td>
-                                        <td className="border px-4 py-2 flex gap-2">
-                                            <button
-                                                onClick={() => setEditingEmployee(emp)}
-                                                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(emp.external_id)}
-                                                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                                            >
-                                                Hapus
-                                            </button>
+                <div className="max-w-5xl mx-auto bg-white p-5 shadow-lg">
+                    {/* Header */}
+                    <div className=" justify-between items-center mb-6">
+                        <h2 className="text-3xl font-bold text-center text-gray-800">
+                            Daftar Karyawan
+                        </h2>
+                        <button
+                            onClick={() => setIsAdding(true)}
+                            className="bg-green-500 text-white px-5 py-2 text-right items-end  rounded-lg shadow hover:bg-green-600 transition"
+                        >
+                            + Tambah Karyawan
+                        </button>
+                    </div>
+
+                    {/* Card Table */}
+                    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                        <table className="w-full text-sm text-gray-700">
+                            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
+                                <tr>
+                                    <th className="px-6 py-4 text-left">Nama</th>
+                                    <th className="px-6 py-4 text-left">NIK</th>
+                                    <th className="px-6 py-4 text-left">Role</th>
+                                    <th className="px-6 py-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {employees.length > 0 ? (
+                                    employees.map((emp) => (
+                                        <tr
+                                            key={emp.id}
+                                            className="border-t hover:bg-gray-50 transition"
+                                        >
+                                            <td className="px-6 py-4 font-medium">
+                                                {emp.first_name}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                {emp.nik}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                                                    {emp.role_name || "Tidak ada peran"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex justify-center gap-2">
+                                                    <button
+                                                        onClick={() => setEditingEmployee(emp)}
+                                                        className="bg-yellow-400 text-white px-3 py-1 rounded-md hover:bg-yellow-500 transition"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(emp.external_id)}
+                                                        className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+                                                    >
+                                                        Hapus
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="4"
+                                            className="text-center py-6 text-gray-400"
+                                        >
+                                            Tidak ada data karyawan
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan="4"
-                                        className="text-center border px-4 py-2 text-gray-500"
-                                    >
-                                        Tidak ada data
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
         </div>

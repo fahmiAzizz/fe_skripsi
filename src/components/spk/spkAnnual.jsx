@@ -19,7 +19,7 @@ export default function SPKAnnuallyChart() {
     const [year, setYear] = useState(String(today.getFullYear()));
     const [chartType, setChartType] = useState("bar");
     const [spkType, setSpkType] = useState("best-item");
-
+    const [type, setType] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -30,14 +30,14 @@ export default function SPKAnnuallyChart() {
         };
 
         fetchData();
-    }, [year, spkType]);
+    }, [year, spkType, type]);
 
     const fetchSales = async () => {
         if (!year || !spkType) return;
 
         try {
             const response = await axios.post(
-                `http://localhost:4321/v1/annualSaleItem/spk/${spkType}?year=${year}`,
+                `http://localhost:4321/v1/annualSaleItem/spk/${spkType}?year=${year}&type=${type}`,
                 {},
                 { withCredentials: true }
             );
@@ -55,8 +55,107 @@ export default function SPKAnnuallyChart() {
                 { withCredentials: true }
             );
         } catch (error) {
-            console.error("Gagal ambil data:", error.response || error);
+            console.error("Gagal update data:", error.response || error);
         }
+    };
+
+    const getSpkTitle = () => {
+        let title = "";
+        switch (spkType) {
+            case "best-item":
+                title = " Ranking Produk Terbaik";
+            case "worst-item":
+                title = "Ranking Produk Terburuk";
+            case "featured-item":
+                title = "Ranking Produk Rekomendasi";
+            default:
+                title = "Ranking Produk";
+        }
+        if (type === "FOOD") return title + " (Food)";
+        if (type === "DRINK") return title + " (Drink)";
+        return title + " (Semua)";
+    };
+
+    // ==========================
+    // 🔥 TAMBAHAN PRINT KHUSUS
+    // ==========================
+    const handlePrintReport = () => {
+        const printWindow = window.open("", "_blank");
+
+        const sortedData = [...sales].sort((a, b) => a.rank - b.rank);
+
+        const html = `
+        <html>
+        <head>
+            <title>Laporan SPK</title>
+            <style>
+                body { font-family: Arial; padding: 20px; }
+                h1, h3 { text-align: center; }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 20px;
+                }
+                th, td {
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                    font-size: 12px;
+                }
+                th { background: #eee; }
+            </style>
+        </head>
+        <body>
+
+            <h1>LAPORAN SPK PENJUALAN</h1>v b  
+            <p><b>Tahun:</b> ${year}</p>
+            <p><b>Jenis:</b> ${getSpkTitle()}</p>
+
+            <h3>Ranking Produk</h3>
+            <ol>
+                ${sortedData.map(item => `
+                    <li>${item.item_name} - Score: ${item.score.toFixed(4)} (Rank ${item.rank})</li>
+                `).join("")}
+            </ol>
+
+            <h3>Detail Data</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Amount</th>
+                        <th>Revenue</th>
+                        <th>Cost</th>
+                        <th>Margin</th>
+                        <th>Preference</th>
+                        <th>Score</th>
+                        <th>Rank</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sortedData.map(item => `
+                        <tr>
+                            <td>${item.item_name}</td>
+                            <td>${item.total_amount}</td>
+                            <td>Rp${item.total_revenue.toLocaleString("id-ID")}</td>
+                            <td>Rp${item.total_cost.toLocaleString("id-ID")}</td>
+                            <td>Rp${item.total_margin.toLocaleString("id-ID")}</td>
+                            <td>${item.preference.toFixed(4)}</td>
+                            <td>${item.score.toFixed(4)}</td>
+                            <td>${item.rank}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+
+        </body>
+        </html>
+        `;
+
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
     };
 
     const chartDataBar = {
@@ -70,19 +169,6 @@ export default function SPKAnnuallyChart() {
                 borderWidth: 1,
             },
         ],
-    };
-
-    const getSpkTitle = () => {
-        switch (spkType) {
-            case "best-item":
-                return "Ranking Produk Terbaik";
-            case "worst-item":
-                return "Ranking Produk Terburuk";
-            case "fitured-item":
-                return "Produk Rekomendasi Untuk Promosi";
-            default:
-                return "Ranking Produk";
-        }
     };
 
     const optionsBar = {
@@ -146,90 +232,153 @@ export default function SPKAnnuallyChart() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-8 bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold text-center mb-4 text-gray-700">
-                {getSpkTitle(spkType)}
-            </h2>
+        <div className="min-h-screen bg-gray-100 p-6">
 
-            {/* Filter Form */}
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    fetchSales();
-                }}
-                className="flex items-center gap-4 mb-6"
-            >
-                <input
-                    type="number"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
-                    className="border p-2 rounded"
-                    placeholder="Tahun (cth: 2025)"
-                    required
-                />
+            <div className="max-w-6xl mx-auto">
 
-                <select
-                    value={spkType}
-                    onChange={(e) => setSpkType(e.target.value)}
-                    className="border p-2 rounded"
-                >
-                    <option value="best-item">Best Produk</option>
-                    <option value="worst-item">Worst Produk</option>
-                    <option value="fitured-item">Featured Produk</option>
-                </select>
-            </form>
+                {/* HEADER */}
+                <div className="mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800 text-center">
+                        {getSpkTitle()}
+                    </h2>
+                    <p className="text-center text-gray-500 mt-1">
+                        Sistem Pendukung Keputusan Produk
+                    </p>
+                </div>
 
-            {/* Chart Type Switcher */}
-            <div className="flex justify-center gap-4 mb-6">
-                <button
-                    onClick={() => setChartType("bar")}
-                    className={`px-4 py-2 rounded font-medium ${chartType === "bar" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-                >
-                    Bar Chart
-                </button>
-                <button
-                    onClick={() => setChartType("doughnut")}
-                    className={`px-4 py-2 rounded font-medium ${chartType === "doughnut" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-                >
-                    Doughnut Chart
-                </button>
-            </div>
-            <div className="max-full">
-                {/* Chart Renderer */}
-                {chartType === "bar" ? (
-                    <Bar data={chartDataBar} options={optionsBar} />
-                ) : (
-                    <Doughnut data={chartDataDoughnut} options={optionsDoughnut} />
-                )}
-            </div>
-            <h3 className="text-xl font-semibold mt-10 mb-2 text-gray-700 text-center">Detail Perhitungan SPK</h3>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm border border-gray-300">
-                    <thead className="bg-gray-100">
-                        <tr>
-                            <th className="border p-2">Item</th>
-                            <th className="border p-2">Margin</th>
-                            <th className="border p-2">Cost</th>
-                            <th className="border p-2">Amount</th>
-                            <th className="border p-2">Preference</th>
-                            <th className="border p-2">Score</th>
-                            <th className="border p-2">Rank</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sales.map((item, idx) => (
-                            <tr key={idx} className="text-center hover:bg-gray-50">
-                                <td className="border p-2">{item.item_name}</td>
-                                <td className="border p-2">Rp{item.total_margin.toLocaleString("id-ID")}</td>
-                                <td className="border p-2">Rp{item.total_cost.toLocaleString("id-ID")}</td>
-                                <td className="border p-2">{item.total_amount}</td>
-                                <td className="border p-2">{item.preference.toFixed(4)}</td>
-                                <td className="border p-2">{item.score.toFixed(4)}</td>
-                                <td className="border p-2">{item.rank}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {/* FILTER CARD */}
+                <div className="bg-white p-6 rounded-xl shadow mb-6">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            fetchSales();
+                        }}
+                        className="flex flex-wrap items-center gap-4 justify-center"
+                    >
+                        <input
+                            type="number"
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            className="border p-2 rounded-lg"
+                            placeholder="Tahun"
+                            required
+                        />
+
+                        <select
+                            value={spkType}
+                            onChange={(e) => setSpkType(e.target.value)}
+                            className="border p-2 rounded-lg"
+                        >
+                            <option value="best-item">Best Produk</option>
+                            <option value="worst-item">Worst Produk</option>
+                            <option value="featured-item">Featured Produk</option>
+                        </select>
+
+                        <select
+                            value={type}
+                            onChange={(e) => setType(e.target.value)}
+                            className="border p-2 rounded-lg"
+                        >
+                            <option value="">Semua Produk</option>
+                            <option value="FOOD">Food</option>
+                            <option value="DRINK">Drink</option>
+                        </select>
+
+                        <button
+                            onClick={handlePrintReport}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                        >
+                            Print Laporan
+                        </button>
+                    </form>
+                </div>
+
+                {/* CHART CARD */}
+                <div className="bg-white p-6 rounded-xl shadow mb-6">
+
+                    {/* Chart Switch */}
+                    <div className="flex justify-center gap-4 mb-6">
+                        <button
+                            onClick={() => setChartType("bar")}
+                            className={`px-4 py-2 rounded-lg font-medium transition ${chartType === "bar"
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-200"
+                                }`}
+                        >
+                            Bar Chart
+                        </button>
+                        <button
+                            onClick={() => setChartType("doughnut")}
+                            className={`px-4 py-2 rounded-lg font-medium transition ${chartType === "doughnut"
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-200"
+                                }`}
+                        >
+                            Doughnut Chart
+                        </button>
+                    </div>
+
+                    <div className="w-full h-96 flex justify-center items-center">
+                        {chartType === "bar" ? (
+                            <Bar data={chartDataBar} options={optionsBar} />
+                        ) : (
+                            <Doughnut data={chartDataDoughnut} options={optionsDoughnut} />
+                        )}
+                    </div>
+                </div>
+
+                {/* TABLE CARD */}
+                <div className="bg-white p-6 rounded-xl shadow">
+
+                    <h3 className="text-xl font-semibold mb-4 text-gray-700 text-center">
+                        Detail Perhitungan SPK
+                    </h3>
+
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm border border-gray-200">
+                            <thead className="bg-gray-100">
+                                <tr>
+                                    <th className="p-2 border">Item</th>
+                                    <th className="p-2 border">Amount</th>
+                                    <th className="p-2 border">Revenue</th>
+                                    <th className="p-2 border">Cost</th>
+                                    <th className="p-2 border">Margin</th>
+                                    <th className="p-2 border">Preference</th>
+                                    <th className="p-2 border">Score</th>
+                                    <th className="p-2 border">Rank</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sales.map((item, idx) => (
+                                    <tr
+                                        key={idx}
+                                        className={`text-center transition hover:bg-gray-50 ${item.rank === 1 ? "bg-green-50 font-semibold" : ""
+                                            }`}
+                                    >
+                                        <td className="p-2 border">{item.item_name}</td>
+                                        <td className="p-2 border">{item.total_amount}</td>
+                                        <td className="p-2 border">
+                                            Rp{item.total_revenue.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border">
+                                            Rp{item.total_cost.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border">
+                                            Rp{item.total_margin.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border">{item.preference.toFixed(4)}</td>
+                                        <td className="p-2 border">{item.score.toFixed(4)}</td>
+                                        <td className="p-2 border font-semibold">
+                                            {item.rank}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     );

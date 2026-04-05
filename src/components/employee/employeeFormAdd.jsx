@@ -129,9 +129,25 @@ export default function EmployeeForm({ onCancel, onRefresh }) {
                         <input type="date" name="date_of_birth" className="w-full p-2 border rounded-lg" value={formData.date_of_birth} onChange={handleChange} required />
                     </div>
 
-                    <button type="submit" className={` px-5 flex justify-center col-span-2 p-2 mx-auto text-white font-semibold rounded-lg ${loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"}`} disabled={loading}>
-                        {loading ? "Menyimpan..." : "Daftar"}
-                    </button>
+                    <div className="col-span-2 flex justify-center gap-3">
+                        <button
+                            type="button"
+                            onClick={onCancel}
+                            className="px-5 py-2 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600"
+                            disabled={loading}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            className={`px-5 py-2 text-white font-semibold rounded-lg ${loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
+                                }`}
+                            disabled={loading}
+                        >
+                            {loading ? "Menyimpan..." : "Daftar"}
+                        </button>
+                    </div>
                 </form >
             </div >
         </div >
