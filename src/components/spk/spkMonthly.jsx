@@ -20,7 +20,7 @@ export default function SPKMonthlyChart() {
     const [year, setYear] = useState(String(today.getFullYear()));
     const [chartType, setChartType] = useState("bar");
     const [spkType, setSpkType] = useState("best-item");
-    const [type, setType] = useState(""); // "" = semua
+    const [type, setType] = useState("DRINK"); // "" = semua
 
     useEffect(() => {
         const fetchData = async () => {
@@ -238,6 +238,16 @@ export default function SPKMonthlyChart() {
         },
     };
 
+    const totals = sales.reduce(
+        (acc, item) => ({
+            total_amount: acc.total_amount + item.total_amount,
+            total_revenue: acc.total_revenue + item.total_revenue,
+            total_cost: acc.total_cost + item.total_cost,
+            total_margin: acc.total_margin + item.total_margin,
+        }),
+        { total_amount: 0, total_revenue: 0, total_cost: 0, total_margin: 0 }
+    );
+
     return (
         <div className="min-h-screen bg-gray-100 p-6">
 
@@ -245,17 +255,14 @@ export default function SPKMonthlyChart() {
             <div className="max-w-6xl mx-auto">
 
                 {/* HEADER */}
-                <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800 text-center">
+                <div className="">
+                    <h2 className="text-3xl font-bold text-gray-800 text-center p-3">
                         {getSpkTitle(spkType)}
                     </h2>
-                    <p className="text-center text-gray-500 mt-1">
-                        Sistem Pendukung Keputusan Produk
-                    </p>
                 </div>
 
                 {/* FILTER CARD */}
-                <div className="bg-white p-6 rounded-xl shadow mb-6">
+                <div className="bg-white p-2 rounded-xl shadow mb-2">
                     <form
                         onSubmit={(e) => {
                             e.preventDefault();
@@ -389,6 +396,24 @@ export default function SPKMonthlyChart() {
                                         <td className="p-2 border font-semibold">{item.rank}</td>
                                     </tr>
                                 ))}
+                                {sales.length > 0 && (
+                                    <tr className="text-center font-bold bg-gray-100">
+                                        <td className="p-2 border">Total</td>
+                                        <td className="p-2 border">{totals.total_amount}</td>
+                                        <td className="p-2 border">
+                                            Rp{totals.total_revenue.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border">
+                                            Rp{totals.total_cost.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border">
+                                            Rp{totals.total_margin.toLocaleString("id-ID")}
+                                        </td>
+                                        <td className="p-2 border"></td>
+                                        <td className="p-2 border"></td>
+                                        <td className="p-2 border"></td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

@@ -19,7 +19,7 @@ export default function SPKAnnuallyChart() {
     const [year, setYear] = useState(String(today.getFullYear()));
     const [chartType, setChartType] = useState("bar");
     const [spkType, setSpkType] = useState("best-item");
-    const [type, setType] = useState("");
+    const [type, setType] = useState("DRINK");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -301,8 +301,8 @@ export default function SPKAnnuallyChart() {
                         <button
                             onClick={() => setChartType("bar")}
                             className={`px-4 py-2 rounded-lg font-medium transition ${chartType === "bar"
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-200"
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200"
                                 }`}
                         >
                             Bar Chart
@@ -310,8 +310,8 @@ export default function SPKAnnuallyChart() {
                         <button
                             onClick={() => setChartType("doughnut")}
                             className={`px-4 py-2 rounded-lg font-medium transition ${chartType === "doughnut"
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-200"
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200"
                                 }`}
                         >
                             Doughnut Chart

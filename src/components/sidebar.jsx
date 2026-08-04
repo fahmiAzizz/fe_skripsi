@@ -96,12 +96,12 @@ export default function Sidebar({ setActivePage, onLogout, user }) {
                             </li>
                             <li onClick={() => setActivePage("spk-monthly")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
                                 <VscGraphLine size={25} />
-                                <p className={`${expanded ? "flex" : "hidden"}`}>SPK Bulanan</p>
+                                <p className={`${expanded ? "flex" : "hidden"}`}>Ranking Produk</p>
                             </li>
-                            <li onClick={() => setActivePage("spk-annual")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
+                            {/* <li onClick={() => setActivePage("spk-annual")} className="flex mx-auto items-center gap-2 cursor-pointer p-2 hover:bg-gray-200">
                                 <VscGraphLine size={25} />
                                 <p className={`${expanded ? "flex" : "hidden"}`}>SPK Tahunan</p>
-                            </li>
+                            </li> */}
                         </>)}
                 </ul>
 

@@ -30,7 +30,7 @@ function MainContent() {
         {activePage === "employee" && <EmployeeList user={userData} />}
         {activePage === "sale" && <DailySaleItem user={userData} />}
         {activePage === "spk-monthly" && <SPKMonthly user={userData} />}
-        {activePage === "spk-annual" && <SPKAnnual user={userData} />}
+        {/* {activePage === "spk-annual" && <SPKAnnual user={userData} />} */}
         {activePage === "role" && <Role user={userData} />}
         {activePage === "item" && <Item user={userData} />}
         {activePage === "evaluation" && <EvaluationWeight user={userData} />}

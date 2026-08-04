@@ -49,13 +49,25 @@ export default function EvaluationWeight() {
         setEditingId(null);
     };
 
-    // 🔥 update state
+    // 🔥 update state + VALIDASI 1–5
     const handleChange = (evaluation_id, criteria, value) => {
+        let newValue = Number(value);
+
+        // validasi angka
+        if (isNaN(newValue)) newValue = 1;
+
+        // 🔥 clamp 1–5
+        if (newValue < 1) newValue = 1;
+        if (newValue > 5) newValue = 5;
+
+        // 🔥 bulatkan (jaga-jaga kalau user paste angka desimal)
+        newValue = Math.round(newValue);
+
         setData((prev) =>
             prev.map((item) =>
                 item.evaluation_id === evaluation_id &&
                     item.criteria === criteria
-                    ? { ...item, weight: Number(value) }
+                    ? { ...item, weight: newValue }
                     : item
             )
         );
@@ -101,23 +113,35 @@ export default function EvaluationWeight() {
             Swal.fire("Error", "Update gagal ❌", "error");
         }
     };
+
     return (
         <div className="p-20 bg-slate-100 min-h-screen">
             <div className="bg-white p-10 rounded-sm shadow-md">
                 <h2 className=" text-3xl text-center font-semibold mb-5">
                     Bobot Kriteria Penilaian
                 </h2>
-                {/* 🔥 Info Bobot */}
+
+                {/* 🔥 Info Bobot (UPDATED) */}
                 <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-800 px-5 py-4 rounded-lg shadow-sm">
                     <p className="text-sm leading-relaxed">
                         Bobot menunjukkan tingkat kepentingan setiap kriteria dalam proses penilaian.
-                        Semakin besar nilai bobot, semakin besar pengaruhnya terhadap hasil.
-                        Total seluruh bobot harus berjumlah 1 atau 100%.
+                        Nilai bobot menggunakan skala 1 sampai 5, dimana:
                     </p>
-                    <p className="text-sm mt-2 font-medium">
-                        Contoh: Cost = 0.4, Margin = 0.3, Quantity = 0.3 → Total = 1
+
+                    <ul className="text-sm mt-2 list-disc list-inside">
+                        <li>1 = Tidak Penting</li>
+                        <li>2 = Kurang Penting</li>
+                        <li>3 = Cukup Penting</li>
+                        <li>4 = Penting</li>
+                        <li>5 = Sangat Penting</li>
+                    </ul>
+
+                    <p className="text-sm mt-2">
+                        Semakin besar nilai bobot, semakin besar pengaruhnya terhadap hasil akhir.
+                        Bobot akan dinormalisasi secara otomatis pada proses perhitungan.
                     </p>
                 </div>
+
                 <div className="bg-gray-200 p-6 rounded-xl shadow-sm">
                     <table className="w-full border-collapse">
                         <thead>
@@ -157,8 +181,10 @@ export default function EvaluationWeight() {
                                         >
                                             <input
                                                 type="number"
-                                                step="0.1"
-                                                value={item.weights[crit]?.value || 0}
+                                                min="1"
+                                                max="5"
+                                                step="1"
+                                                value={item.weights[crit]?.value || 1}
                                                 disabled={
                                                     editingId !== item.evaluation_id
                                                 }
@@ -192,13 +218,13 @@ export default function EvaluationWeight() {
                                                         handleUpdate(item)
                                                     }
                                                 >
-                                                    Save
+                                                    Simpan
                                                 </button>
                                                 <button
                                                     className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                                                     onClick={handleCancel}
                                                 >
-                                                    Cancel
+                                                    Batal
                                                 </button>
                                             </div>
                                         )}

@@ -8,6 +8,7 @@ export default function DailySaleItem() {
     const [sales, setSales] = useState([]);
     const [items, setItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
+    const [backupForm, setBackupForm] = useState(null);
 
     const [formData, setFormData] = useState({
         item_name: "",
@@ -57,6 +58,12 @@ export default function DailySaleItem() {
                 { withCredentials: true }
             );
 
+            setBackupForm({
+                item_name: response.data.name,
+                amount: response.data.amount,
+                date: response.data.date.split("T")[0],
+            });
+
             setFormData({
                 item_name: response.data.name,
                 amount: response.data.amount,
@@ -78,7 +85,16 @@ export default function DailySaleItem() {
         setFile(e.target.files[0]);
     };
 
-    // 🔥 HANDLE UPLOAD
+    const handleCancelEdit = () => {
+        setFormData({
+            item_name: "",
+            amount: "",
+            date: new Date().toISOString().split("T")[0],
+        });
+        setEditId(null);
+        setBackupForm(null);
+    };
+
     const handleUpload = async () => {
         if (!file) {
             Swal.fire("Warning", "Pilih file terlebih dahulu!", "warning");
@@ -89,8 +105,8 @@ export default function DailySaleItem() {
         formDataUpload.append("file", file);
 
         try {
-            await axios.post(
-                "http://localhost:4321/v1/dailySaleItem/upload", // 🔥 endpoint upload (sesuaikan BE)
+            const response = await axios.post(
+                "http://localhost:4321/v1/dailySaleItem/import-daily-sales", // 🔥 pastikan URL sesuai
                 formDataUpload,
                 {
                     withCredentials: true,
@@ -100,15 +116,16 @@ export default function DailySaleItem() {
                 }
             );
 
-            Swal.fire("Berhasil!", "File berhasil diupload.", "success");
-            setFile(null);
-            fetchSales();
+            if (response.status === 200) {
+                Swal.fire("Berhasil!", "File berhasil diupload.", "success");
+                setFile(null);
+                fetchSales();
+            }
         } catch (error) {
             console.error("Upload gagal:", error);
             Swal.fire("Gagal", "Upload file gagal.", "error");
         }
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -223,13 +240,24 @@ export default function DailySaleItem() {
                     />
 
                     {/* 🔥 BUTTON + UPLOAD */}
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <button
                             type="submit"
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                         >
                             {editId ? "Update" : "Tambah"}
                         </button>
+
+                        {/* 🔥 Tombol batal muncul saat edit */}
+                        {editId && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            >
+                                Batal
+                            </button>
+                        )}
 
                         <input
                             type="file"
